@@ -1,62 +1,33 @@
 package org.micro.social.eurekaclient.service;
 
 
-import org.micro.social.eurekaclient.repository.UserRepository;
-import org.micro.social.eurekaclient.dto.RegistrationUserDto;
-import org.micro.social.eurekaclient.dto.UserDto;
+import org.micro.shareable.dto.UserDto;
+import org.micro.shareable.kafka.KafkaMessage;
 import org.micro.social.eurekaclient.model.User;
+import org.micro.social.eurekaclient.repository.RoleRepository;
 import org.micro.social.eurekaclient.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService implements UserDetailsService {
+public class UserService {
 
-    private UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    private RoleService roleService;
-
-    private PasswordEncoder passwordEncoder;
-
-
-
-    @Autowired
-    public void setUserRepository(UserRepository userRepository) {
+    public UserService(RoleRepository roleRepository, UserRepository userRepository, KafkaTemplate<String, Object> kafkaTemplate) {
+        this.roleRepository = roleRepository;
         this.userRepository = userRepository;
-    }
-
-    @Autowired
-    public void setRoleService(RoleService roleService) {
-        this.roleService = roleService;
-    }
-
-    @Autowired
-    public void setPasswordEncoder(PasswordEncoder encoder){this.passwordEncoder = encoder;}
-
-
-    public User save(User user){
-       return userRepository.save(user);
-    }
-
-
-
-    public List<User> getAll(){
-        return userRepository.findAll();
-    }
-
-    public User getUserById(Integer id){
-        return userRepository.getById(id);
+        this.kafkaTemplate = kafkaTemplate;
     }
 
 
@@ -64,33 +35,71 @@ public class UserService implements UserDetailsService {
         return userRepository.getByUsername(username);
     }
 
-    @Override
+
+    public User getUserById(Integer id) {
+        return userRepository.getById(id);
+    }
+
+    public User createNewUser(User user) {
+        user.setPassword(hashPassword(user.getPassword()));
+        return userRepository.save(user);
+    }
+
+
+    private String hashPassword(String password) {
+        return new BCryptPasswordEncoder().encode(password);
+    }
+
     @Transactional
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(
-                String.format("User not found", username)
-        ));
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList())
-        );
+    @KafkaListener(topics = "user-security-requests", groupId = "user-service-group")
+    public void handleUserRequest(KafkaMessage message) {
+        processUserRequest(message, "user-security-response");
     }
 
-    public User createNewUser(RegistrationUserDto registrationUserDto) {
-        User user = new User();
-        user.setUsername(registrationUserDto.getUsername());
-        user.setEmail(registrationUserDto.getEmail());
-        //user.setPassword(passwordEncoder.encode(registrationUserDto.getPassword()));
-        user.setBirthDate(registrationUserDto.getBirthDate());
-        user.setRoles(List.of(roleService.getUserRole()));
-        user.setPosts(new HashSet<>());
-        user.setFriends(new HashSet<>());
-        return save(user);
+    @KafkaListener(topics = "from-security-to-user-save", groupId = "user-requests")
+    public void saveUser(KafkaMessage message) {
+        processUserRequest(message, "from-user-to-security-save");
     }
 
-    public UserDto userToUserDto(User user){
-        return new UserDto(user.getId(), user.getUsername(),
-                user.getEmail(), user.getBirthDate());
+    private void processUserRequest(KafkaMessage message, String responseTopic) {
+        //save user
+        if ("from-user-to-security-save".equals(responseTopic)) {
+            UserDto userDto = message.getUserDto();
+
+            //user exists
+            if (userRepository.getByUsername(userDto.getUsername()).isPresent() |
+                    userRepository.getByPassword(userDto.getPassword()).isPresent()) {
+                kafkaTemplate.send(responseTopic, new KafkaMessage(userDto,"Username or password exists"));
+            }
+
+            //create user
+            else {
+            User newUser = new User(userDto.getUsername(), userDto.getEmail(), userDto.getPassword(), userDto.getBirthDate(),
+                    Set.of(roleRepository.findByName("USER").get()));
+            createNewUser(newUser);
+            kafkaTemplate.send(responseTopic, new KafkaMessage(userDto, "Created"));
+            }
+        }
+
+        //user requests
+        else if ("user-security-response".equals(responseTopic)) {
+            Optional<User> user = findByUsername(message.getUsername());
+
+            //(user exists)
+            if (user.isPresent()) {
+                UserDto userDto = new UserDto(user.get().getUsername(),
+                        user.get().getEmail(),
+                        user.get().getPassword(),
+                        user.get().getBirthDate(),
+                        user.get().getRoles().stream().collect(Collectors.toSet()));
+                kafkaTemplate.send(responseTopic, new KafkaMessage(userDto));
+            }
+
+            //(user doesn't exists)
+            else {
+                kafkaTemplate.send(responseTopic, new KafkaMessage(null, message.getUsername()));
+            }
+        }
     }
+
 }

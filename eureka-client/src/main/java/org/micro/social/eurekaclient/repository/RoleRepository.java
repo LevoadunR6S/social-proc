@@ -1,6 +1,7 @@
 package org.micro.social.eurekaclient.repository;
 
-import org.micro.social.eurekaclient.model.Role;
+
+import org.micro.shareable.model.Role;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;
