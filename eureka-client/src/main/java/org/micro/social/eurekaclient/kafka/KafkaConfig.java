@@ -56,4 +56,3 @@ public class KafkaConfig {
         return factory;
     }
 }
-//todo config for security service doesnt work
