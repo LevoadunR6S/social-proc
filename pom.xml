@@ -38,23 +38,11 @@
         </dependency>
 
 
-
-
-
-
-
-
-
-
-
-
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
             <version>3.2.2</version>
         </dependency>
-
 
 
         <!-- Spring Security -->
@@ -66,13 +54,13 @@
     </dependencies>
 
 
-
     <modules>
-<!--        <module>server</module>-->
+        <module>eserver</module>
         <module>security</module>
-        <module>eureka-client</module>
-<!--        <module>api-gateway</module>-->
-<!--        <module>config-service</module>-->
+        <module>eclient</module>
+        <module>shareable</module>
+        <!--        <module>api-gateway</module>-->
+        <!--        <module>config-service</module>-->
     </modules>
 
     <build>

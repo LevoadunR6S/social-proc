@@ -53,7 +53,11 @@
             <scope>runtime</scope>
             <version>${jjwt.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.micro</groupId>
+            <artifactId>shareable</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -118,11 +122,7 @@
             <version>3.2.2</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.micro</groupId>
-            <artifactId>shareable</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
+
     </dependencies>
 
     <dependencyManagement>

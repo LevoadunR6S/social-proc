@@ -3,15 +3,15 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.3.2</version>
         <relativePath/>
     </parent>
+
     <groupId>org.micro</groupId>
-    <artifactId>eureka-client</artifactId>
+    <artifactId>eclient</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>eureka-client</name>
     <description>eureka-client</description>
@@ -113,16 +113,16 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
-
-
-
         <dependency>
-            <groupId>org.micro</groupId>
-            <artifactId>shareable</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-
+        <dependency>
+        <groupId>org.micro</groupId>
+        <artifactId>shareable</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka -->
         <dependency>
@@ -130,7 +130,6 @@
             <artifactId>spring-kafka</artifactId>
             <version>3.2.2</version>
         </dependency>
-
 
 
         <dependency>
@@ -143,10 +142,6 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.14.0</version>
         </dependency>
-
-
-
-
 
 
     </dependencies>
@@ -170,7 +165,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
 
 
 </project>
