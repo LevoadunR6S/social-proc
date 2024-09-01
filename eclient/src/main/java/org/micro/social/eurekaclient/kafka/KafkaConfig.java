@@ -20,11 +20,16 @@ import java.util.Map;
 @EnableKafka
 public class KafkaConfig {
 
+
+
     @Bean
      public ProducerFactory<String,Object> producerFactoryUserService(){
         Map<String, Object> configProps = new HashMap<>();
+        //Вказуємо до якого сервера підключається продюсер
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,"localhost:9092");
+        //Вказуємо як буде серіалізовуватись ключ в повідомленні Kafka
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        //Вказуємо як буде серіалізовуватись значення в повідомленні Kafka
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         return new DefaultKafkaProducerFactory<>(configProps);
     }
@@ -36,13 +41,18 @@ public class KafkaConfig {
     @Bean
     public ConsumerFactory<String,Object> consumerFactory(){
         Map<String,Object> configProps = new HashMap<>();
+        //Вказуємо до якого сервера підключається продюсер
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,"localhost:9092");
+        //Вказуємо групу консюмерів
         configProps.put(ConsumerConfig.GROUP_ID_CONFIG,"user-requests");
+        //Вказуємо як буде десеріалізовуватись ключ в повідомленні Kafka
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        //Вказуємо як буде десеріалізовуватись значення в повідомленні Kafka
         configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        //Вказуємо пакети з яких можна десеріалізувати об'єкти
         configProps.put(org.springframework.kafka.support.serializer.JsonDeserializer.TRUSTED_PACKAGES,"*");
+        //Вказуємо до якого типу будуть десеріалізовуватись об'єкти по замовчуванню
         configProps.put(org.springframework.kafka.support.serializer.JsonDeserializer.VALUE_DEFAULT_TYPE, Object.class.getName());
-
         return new DefaultKafkaConsumerFactory<>(configProps,new StringDeserializer(), new org.springframework.kafka.support.serializer.JsonDeserializer<>());
     }
 

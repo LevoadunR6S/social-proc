@@ -2,26 +2,24 @@ package org.micro.social.eurekasecurity.service;
 
 
 import org.micro.shareable.response.ResponseHandler;
+import org.micro.social.eurekasecurity.dto.JwtRequest;
+import org.micro.social.eurekasecurity.dto.JwtResponse;
 import org.micro.social.eurekasecurity.dto.RegistrationUserDto;
 import org.micro.shareable.dto.UserDto;
 import org.micro.social.eurekasecurity.kafka.KafkaUserClient;
+import org.micro.social.eurekasecurity.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @Service
-public class AuthService implements UserDetailsService {
-
+public class AuthService {
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -29,30 +27,39 @@ public class AuthService implements UserDetailsService {
     @Autowired
     private KafkaUserClient kafkaUserClient;
 
+    @Autowired
+    private RoleRepository roleRepository;
 
-    @Override
-    @Transactional
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<UserDto> user = kafkaUserClient.getUserByUsername(username);
-        if (user.isEmpty()) {
-            throw new UsernameNotFoundException("User not found with username: " + username);
+    @Autowired
+    private RestTemplate restTemplate;
+
+    public ResponseEntity<?> login(JwtRequest request) {
+        UserDto userDto = kafkaUserClient.getUserByUsername(request.getUsername()).get();
+        String username = userDto.getUsername();
+        String requestName = request.getUsername();
+        if (userDto != null & username.trim().equals(requestName.trim())) {
+            String accessToken = jwtUtils.generate(userDto.getUsername(), userDto.getPassword(), userDto.getRoles(), "ACCESS");
+            String refreshToken = jwtUtils.generate(userDto.getUsername(), userDto.getPassword(), userDto.getRoles(), "REFRESH");
+            JwtResponse jwtResponse = new JwtResponse(accessToken, refreshToken);
+            return ResponseHandler.responseBuilder(HttpStatus.OK, jwtResponse, "result");
         }
-        return userDtoToUser(user.get());
+        return ResponseHandler.responseBuilder(HttpStatus.BAD_REQUEST, "Username or password is incorrect", "result");
     }
 
-
     public ResponseEntity<?> createNewUser(RegistrationUserDto newUserCandidate) {
+
         if (validatePassword(newUserCandidate)) {
             UserDto userDto = registrationUserToDto(newUserCandidate);
             Optional<String> result = kafkaUserClient.createUser(userDto);
             HttpStatus httpStatus;
-            if (result.get().equals("Created")){
-                httpStatus=HttpStatus.CREATED;
-            }
-            else httpStatus = HttpStatus.BAD_REQUEST;
+            if (result.get().equals("Created")) {
+                httpStatus = HttpStatus.CREATED;
 
+                return ResponseHandler
+                        .responseBuilder(httpStatus, result, "result");
+            } else httpStatus = HttpStatus.BAD_REQUEST;
             return ResponseHandler
-                    .responseBuilder(httpStatus, result , "result");
+                    .responseBuilder(httpStatus, result.get(), "result");
         } else return ResponseHandler
                 .responseBuilder(HttpStatus.BAD_REQUEST, "Password doesn't match", "result");
     }
@@ -64,19 +71,13 @@ public class AuthService implements UserDetailsService {
     public UserDto registrationUserToDto(RegistrationUserDto registrationUserDto) {
         return new UserDto(
                 registrationUserDto.getUsername(),
-                registrationUserDto.getPassword(),
+                //registrationUserDto.getPassword(),
+                BCrypt.hashpw(registrationUserDto.getPassword(), BCrypt.gensalt()),
                 registrationUserDto.getEmail(),
                 registrationUserDto.getBirthDate(),
-                null);
-    }
-
-    public User userDtoToUser(UserDto userDto) {
-        return new org.springframework.security.core.userdetails.User(
-                userDto.getUsername(),
-                userDto.getPassword(),
-                userDto.getRoles().stream()
-                        .map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toSet())
+                Set.of(roleRepository.findByName("USER").get())
         );
     }
-
 }
+
+

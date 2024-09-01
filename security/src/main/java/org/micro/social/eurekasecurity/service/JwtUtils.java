@@ -2,73 +2,68 @@ package org.micro.social.eurekasecurity.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import org.micro.shareable.model.Role;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import java.security.Key;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 
-@Component
+@Service
 public class JwtUtils {
-    @Value("${jwt-secret-key}")
     private String secret;
+    private Long lifetime;
 
-    @Value("${jwt-expiration-milliseconds}")
-    private Integer lifetime;
+    private Key key;
 
-    public String generateToken(UserDetails userDetails) {
-
-
-        Map<String, Object> claims = new HashMap<>();
-        List<String> rolesList = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-        claims.put("roles", rolesList);
-
-
-        Date issuedDate = new Date();
-        Date expiredDate = new Date(issuedDate.getTime() + lifetime);
+    @Autowired
+    public JwtUtils(@Value("${jwt-secret-key}") String secret,
+                    @Value("${jwt-expiration-milliseconds}") Long lifetime) {
+        this.secret = secret;
+        this.lifetime = lifetime;
+        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+    }
 
 
+
+    public String generate(String username, String password, Set<Role> roles, String tokenType) {
+
+        Map<String, String> claims = Map.of(
+                "username", username,
+                "password", password,
+                "roles", roles.toString()
+        );
+        long expMillis = "ACCESS".equalsIgnoreCase(tokenType)
+                ? lifetime
+                : lifetime * 5;
+
+        final Date now = new Date();
+        final Date exp = new Date(now.getTime() + expMillis);
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(issuedDate)
-                .setExpiration(expiredDate)
-                .signWith(SignatureAlgorithm.HS256, secret)
+                .setSubject(claims.get("id"))
+                .setIssuedAt(now)
+                .setExpiration(exp)
+                .signWith(key)
                 .compact();
     }
 
-    public String getUsername(String token) {
-        return getAllClaimsFromToken(token).getSubject();
-    }
-
-    public List<String> getRoles(String token) {
-        return getAllClaimsFromToken(token).get("roles", List.class);
-    }
 
     private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(secret)
-                .parseClaimsJws(token)
-                .getBody();
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJwt(token).getBody();
     }
 
-    public Boolean isTokenExpired(String token){
+    public Boolean isTokenExpired(String token) {
         return getAllClaimsFromToken(token).getExpiration().before(new Date());
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails){
-        final String username = getUsername(token);
-        return username.equals(userDetails.getUsername())&& !isTokenExpired(token);
-    }
 
 }
 

@@ -1,15 +1,14 @@
 package org.micro.social.eurekaclient.service;
 
 
+import jakarta.persistence.EntityManager;
 import org.micro.shareable.dto.UserDto;
 import org.micro.shareable.kafka.KafkaMessage;
 import org.micro.social.eurekaclient.model.User;
-import org.micro.social.eurekaclient.repository.RoleRepository;
 import org.micro.social.eurekaclient.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +19,11 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
-    private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public UserService(RoleRepository roleRepository, UserRepository userRepository, KafkaTemplate<String, Object> kafkaTemplate) {
-        this.roleRepository = roleRepository;
+    @Autowired
+    public UserService(UserRepository userRepository, KafkaTemplate<String, Object> kafkaTemplate) {
         this.userRepository = userRepository;
         this.kafkaTemplate = kafkaTemplate;
     }
@@ -41,14 +39,14 @@ public class UserService {
     }
 
     public User createNewUser(User user) {
-        user.setPassword(hashPassword(user.getPassword()));
+       // user.setPassword(hashPassword(user.getPassword()));
         return userRepository.save(user);
     }
 
-
-    private String hashPassword(String password) {
-        return new BCryptPasswordEncoder().encode(password);
-    }
+    //todo зберігати юзера з усіма полями
+//    private String hashPassword(String password) {
+//        return new BCryptPasswordEncoder().encode(password);
+//    }
 
     @Transactional
     @KafkaListener(topics = "user-security-requests", groupId = "user-service-group")
@@ -74,18 +72,18 @@ public class UserService {
 
             //create user
             else {
-            User newUser = new User(userDto.getUsername(), userDto.getEmail(), userDto.getPassword(), userDto.getBirthDate(),
-                    Set.of(roleRepository.findByName("USER").get()));
+            User newUser = new User(userDto.getUsername(), userDto.getEmail(), userDto.getPassword(), userDto.getBirthDate()
+                    /*userDto.getRoles()*/);
             createNewUser(newUser);
             kafkaTemplate.send(responseTopic, new KafkaMessage(userDto, "Created"));
-            }
+            }//todo add role save
         }
 
         //user requests
         else if ("user-security-response".equals(responseTopic)) {
             Optional<User> user = findByUsername(message.getUsername());
 
-            //(user exists)
+            //user exists
             if (user.isPresent()) {
                 UserDto userDto = new UserDto(user.get().getUsername(),
                         user.get().getEmail(),
@@ -95,7 +93,7 @@ public class UserService {
                 kafkaTemplate.send(responseTopic, new KafkaMessage(userDto));
             }
 
-            //(user doesn't exists)
+            //user doesn't exists
             else {
                 kafkaTemplate.send(responseTopic, new KafkaMessage(null, message.getUsername()));
             }

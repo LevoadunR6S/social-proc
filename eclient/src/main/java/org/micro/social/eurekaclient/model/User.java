@@ -72,11 +72,11 @@ public class User {
     )
     private Collection<Role> roles;
 
-    public User(String username, String email, String password, LocalDate birthDate, Set<Role> roles) {
+    public User(String username, String email, String password, LocalDate birthDate/*, Set<Role> roles*/) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.birthDate = birthDate;
-        //this.roles = roles;
+        /* this.roles = roles;*/
     }
 }

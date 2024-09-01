@@ -1,4 +1,4 @@
-package org.micro.social.eurekaclient.repository;
+package org.micro.social.eurekasecurity.repository;
 
 
 import org.micro.shareable.model.Role;
