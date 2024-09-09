@@ -1,4 +1,4 @@
-package org.micro.social.eurekasecurity.config;
+package org.micro.chatserver.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;

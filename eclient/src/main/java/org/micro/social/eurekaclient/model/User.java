@@ -21,7 +21,7 @@ import java.util.Set;
 @Setter
 @Entity
 @ToString
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // Ігнорує специфічні для Hibernate властивості при серіалізації в JSON
 public class User {
 
     @Id
@@ -42,41 +42,25 @@ public class User {
 
     @NotNull
     @DateTimeFormat(pattern = "YYYY-MM-dd")
-    @Past(message = "invalid date")
+    @Past(message = "invalid date") // Перевіряє, що дата є в минулому
     private LocalDate birthDate;
 
-    @JsonIgnore
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "user_friends",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "friend_id")
-    )
-    private Set<User> friends;
 
     @JsonIgnore
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER) //Дані завантажуються відразу
     @JoinTable(
-            name = "user_post",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "post_id")
-    )
-    private Set<Post> posts;
-
-    @JsonIgnore
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
+            name = "user_roles", // Назва таблиці зв'язку
+            joinColumns = @JoinColumn(name = "user_id"), // Стовпець, що посилається на цей клас
+            inverseJoinColumns = @JoinColumn(name = "role_id") // Стовпець, що посилається на інший клас
     )
     private Collection<Role> roles;
 
-    public User(String username, String email, String password, LocalDate birthDate/*, Set<Role> roles*/) {
+    // Конструктор для ініціалізації користувача без ідентифікатора
+    public User(String username, String email, String password, LocalDate birthDate, Set<Role> roles) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.birthDate = birthDate;
-        /* this.roles = roles;*/
+        this.roles = roles;
     }
 }

@@ -15,6 +15,7 @@
         <option value="$PROJECT_DIR$/shareable/pom.xml" />
         <option value="$PROJECT_DIR$/eserver/pom.xml" />
         <option value="$PROJECT_DIR$/config-server/pom.xml" />
+        <option value="$PROJECT_DIR$/chat-server/pom.xml" />
       </list>
     </option>
   </component>

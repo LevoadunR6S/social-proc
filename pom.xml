@@ -59,8 +59,9 @@
         <module>security</module>
         <module>eclient</module>
         <module>shareable</module>
-        <!--        <module>api-gateway</module>-->
-        <!--        <module>config-service</module>-->
+        <module>api-gateway</module>
+        <module>config-server</module>
+        <module>data-service</module>
     </modules>
 
     <build>
