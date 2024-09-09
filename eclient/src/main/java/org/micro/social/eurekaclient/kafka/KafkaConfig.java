@@ -48,6 +48,9 @@ public class KafkaConfig {
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         //Вказуємо як буде десеріалізовуватись значення в повідомленні Kafka
         configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        configProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest"); // Установлюємо auto.offset.reset
+        configProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false); // Забороняємо автоматичне комітування офсетів
+
         //Вказуємо пакети з яких можна десеріалізувати об'єкти
         configProps.put(org.springframework.kafka.support.serializer.JsonDeserializer.TRUSTED_PACKAGES, "*");
         //Вказуємо до якого типу будуть десеріалізовуватись об'єкти по замовчуванню

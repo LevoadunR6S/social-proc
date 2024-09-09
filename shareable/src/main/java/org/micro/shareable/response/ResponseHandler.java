@@ -2,10 +2,10 @@ package org.micro.shareable.response;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import java.util.HashMap;
 import java.util.Map;
 
+//Клас-обертка, для обробника відповідей
 public class ResponseHandler {
     public static ResponseEntity<Object> responseBuilder
             (HttpStatus httpStatus, Object responseObject, String name)

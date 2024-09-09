@@ -21,9 +21,5 @@ public class RedisService {
         return (String) redisTemplate.opsForValue().get(username);
     }
 
-    //Видалення RefreshToken з бази Redis
-    public void deleteToken(String username) {
-        redisTemplate.delete(username);
-    }
 }
 

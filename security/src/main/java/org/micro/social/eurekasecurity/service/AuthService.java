@@ -1,10 +1,6 @@
 package org.micro.social.eurekasecurity.service;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
-import org.micro.shareable.response.ResponseHandler;
 import org.micro.social.eurekasecurity.dto.JwtRequest;
-import org.micro.social.eurekasecurity.dto.JwtResponse;
 import org.micro.social.eurekasecurity.dto.RegistrationUserDto;
 import org.micro.shareable.dto.UserDto;
 import org.micro.social.eurekasecurity.kafka.KafkaUserClient;
@@ -12,16 +8,11 @@ import org.micro.social.eurekasecurity.redis.RedisService;
 import org.micro.social.eurekasecurity.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ServerWebExchange;
 
-import java.security.Principal;
 import java.util.Optional;
 import java.util.Set;
 
@@ -44,12 +35,12 @@ public class AuthService {
     Long lifetime;
 
     //Метод для входу користувача
-    public ResponseEntity<?> login(JwtRequest request, ServerWebExchange exchange) {
+    public String login(JwtRequest request, ServerWebExchange exchange) {
         // Отримання UserDto за іменем
         UserDto userDto = kafkaUserClient.getUserByUsername(request.getUsername()).orElse(null);
-        String username = userDto != null ? userDto.getUsername() : null;
-        if (userDto != null) {
 
+        if (userDto != null) {
+            String username = userDto.getUsername();
             // Генерація токенів
             String accessToken = jwtUtils.generate(username, userDto.getRoles(), "ACCESS");
             String refreshToken = jwtUtils.generate(username, userDto.getRoles(), "REFRESH");
@@ -59,18 +50,15 @@ public class AuthService {
 
             // Додавання токена в cookie
             exchange.getResponse().addCookie(createCookie("AccessToken", accessToken, lifetime));
-
-
             // Повернення відповіді з токенами
-            JwtResponse jwtResponse = new JwtResponse(accessToken, refreshToken);
-            return ResponseHandler.responseBuilder(HttpStatus.OK, jwtResponse, "result");
+            return "Вхід успішний";
         }
 
-        return ResponseHandler.responseBuilder(HttpStatus.BAD_REQUEST, "Username or password is incorrect", "result");
+        return "Пароль або логін невірний";
     }
 
     //Метод для реєстрації користувача
-    public ResponseEntity<?> createNewUser(RegistrationUserDto newUserCandidate) {
+    public String createNewUser(RegistrationUserDto newUserCandidate) {
         // Перевірка, чи пароль та підтвердження пароля співпадають
         if (validatePassword(newUserCandidate)) {
             // Конвертація RegistrationUserDto в UserDto
@@ -78,23 +66,29 @@ public class AuthService {
             // Відправка запиту на створення користувача через Kafka
             Optional<String> result = kafkaUserClient.createUser(userDto);
 
-            HttpStatus httpStatus;
             // Перевірка результату створення користувача
             if (result.isPresent() && result.get().equals("Created")) {
-                httpStatus = HttpStatus.CREATED;
-                return ResponseHandler.responseBuilder(httpStatus, result, "result");
+                return "Створено";
             } else {
-                httpStatus = HttpStatus.BAD_REQUEST;
-                return ResponseHandler.responseBuilder(httpStatus, result.orElse("Error"), "result");
+                return "Помилка";
             }
         } else {
-            return ResponseHandler.responseBuilder(HttpStatus.BAD_REQUEST, "Password doesn't match", "result");
+            return "Пароль не співпадає";
         }
     }
 
-    //Оновлює Access токен на основі наданого Refresh токена
-    public String refreshToken(String token) {
-        return jwtUtils.refreshAccessToken(token);
+    public String logout(ServerWebExchange exchange) {
+
+        String token = exchange.getResponse().getCookies().get("AccessToken").get(0).getValue();
+
+        ResponseCookie accessTokenCookie = ResponseCookie.from("AccessToken", "")
+                .maxAge(0)
+                .path("/")
+                .build();
+        exchange.getResponse().addCookie(accessTokenCookie);
+        //Видаляється RefreshToken користувача (Користувач отримується з claims токена) з Redis бази даних
+        redisService.deleteToken(jwtUtils.getAllClaimsFromToken(token).get("username", String.class));
+        return "OK";
     }
 
     //Перевіряє, чи співпадає пароль з підтвердженням пароля

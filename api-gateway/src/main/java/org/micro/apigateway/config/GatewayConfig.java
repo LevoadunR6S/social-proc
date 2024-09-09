@@ -13,19 +13,12 @@ public class GatewayConfig {
     @Autowired
     private JwtRequestFilter jwtFilter;
 
-    @Autowired
-    private PathFilter pathFilter;
 
 
     //Вказуємо який шаблон url для кожного сервісу, необхідні фільтри та за необхідності Http код
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route("logout", r -> r.path("/auth/logout")
-                        .filters(f -> f
-                                .filter(pathFilter)
-                        )
-                        .uri("no://op"))
                 .route("user_route", r -> r.path("/users/**")
                         .filters(f -> f.filter(jwtFilter))
                         .uri("lb://ECLIENT"))

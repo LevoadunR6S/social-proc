@@ -50,12 +50,8 @@ public class JwtRequestFilter implements GatewayFilter {
         //Отримуємо токен з cookie
         String token = request.getCookies().get("AccessToken").get(0).getValue();
 
-        //Якщо шлях має в собі "/auth/logout",видаляється RefreshToken користувача
-        // (Користувач отримується з claims токена) з Redis бази даних
-        if (exchange.getRequest().getPath().toString().contains("/auth/logout")) {
-            redisService.deleteToken(jwtUtils.getAllClaimsFromToken(token).get("username", String.class));
-            return chain.filter(exchange);
-        }
+
+
 
         // Перевіряємо, чи не прострочений токен
         if (jwtUtils.isTokenExpired(token)) {

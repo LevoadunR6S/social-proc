@@ -63,30 +63,10 @@ public class JwtUtils {
 
 
     // Отримання всіх claims з токена
-    private Claims getAllClaimsFromToken(String token) throws ExpiredJwtException {
+    public Claims getAllClaimsFromToken(String token) throws ExpiredJwtException {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 
-
-
-    public String refreshAccessToken(String refreshToken) {
-        try {
-            // Отримання claims з Refresh токена
-            Claims claims = getAllClaimsFromToken(refreshToken);
-            // Отримання імені користувача з claims
-            String username = claims.get("username", String.class);
-
-            // Отримання UserDto за допомогою username
-            UserDto userDto = kafkaUserClient.getUserByUsername(username).get();
-            // Отримання ролей користувача
-            Set<Role> roles = userDto.getRoles();
-
-            // Генерація нового Access токена
-            return generate(username, roles, "ACCESS");
-        } catch (Exception e) {
-            throw new RuntimeException("Invalid refresh token", e); // Обробка помилки у разі некоректного Refresh токена
-        }
-    }
 
 
 }

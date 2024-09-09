@@ -8,7 +8,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.*;
-import org.micro.shareable.model.Post;
 import org.micro.shareable.model.Role;
 import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDate;

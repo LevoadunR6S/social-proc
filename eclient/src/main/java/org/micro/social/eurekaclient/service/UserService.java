@@ -20,6 +20,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate; // Шаблон для відправки повідомлень до Kafka
 
+
+
     @Autowired
     public UserService(UserRepository userRepository, KafkaTemplate<String, Object> kafkaTemplate) {
         this.userRepository = userRepository;

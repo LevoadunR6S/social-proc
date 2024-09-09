@@ -1,13 +1,13 @@
 package org.micro.shareable.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import org.micro.shareable.model.Role;
-
 import java.time.LocalDate;
 import java.util.Set;
 
+
+//Клас для передачі спрощеної моделі користувача між елементами додатку
 @AllArgsConstructor
 @Data
 public class UserDto {

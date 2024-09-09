@@ -20,24 +20,11 @@
         <spring-cloud.version>2023.0.3</spring-cloud.version>
         <spring-boot.version>3.3.2</spring-boot.version>
         <lombok.version>1.18.34</lombok.version>
+        <jjwt.version>0.11.5</jjwt.version>
     </properties>
 
     <dependencies>
         <!-- Spring Boot Starters -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-
-
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -45,12 +32,10 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+            <groupId>org.micro</groupId>
+            <artifactId>shareable</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
-
-
-
 
 
     </dependencies>

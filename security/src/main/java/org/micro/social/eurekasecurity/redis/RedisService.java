@@ -20,5 +20,9 @@ public class RedisService {
     public void saveRefreshToken(String username, String token) {
         redisTemplate.opsForValue().set(username, token, lifetime*5, TimeUnit.MILLISECONDS);
     }
+    public void deleteToken(String username) {
+        redisTemplate.delete(username);
+    }
+
 }
 
