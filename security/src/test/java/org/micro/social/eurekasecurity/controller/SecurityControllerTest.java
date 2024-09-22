@@ -1,6 +1,5 @@
 package org.micro.social.eurekasecurity.controller;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.micro.social.eurekasecurity.dto.JwtRequest;
@@ -24,6 +23,7 @@ class SecurityControllerTest {
     @Autowired
     private WebTestClient webTestClient;
 
+
     @MockBean
     private AuthService authService;
 
@@ -33,12 +33,11 @@ class SecurityControllerTest {
 
     JwtRequest jwtRequest;
 
-    AutoCloseable autoCloseable;
 
 
     @BeforeEach
     public void setUp() {
-        autoCloseable = MockitoAnnotations.openMocks(this);
+        MockitoAnnotations.openMocks(this);
         jwtRequest = new JwtRequest("Bob", "Fischer");
 
         correctUser = new RegistrationUserDto(
@@ -57,10 +56,7 @@ class SecurityControllerTest {
     }
 
 
-    @AfterEach
-    void tearDown() throws Exception{
-        autoCloseable.close();
-    }
+
 
 
 

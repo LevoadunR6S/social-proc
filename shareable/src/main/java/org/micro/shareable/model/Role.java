@@ -3,6 +3,7 @@ package org.micro.shareable.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+
 //Клас, який є моделлю ролі користувача в межах додатку
 @Entity
 @Data

@@ -4,14 +4,10 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.apache.catalina.User;
-import org.micro.shareable.dto.UserDto;
 import org.micro.shareable.model.Role;
 import org.micro.social.eurekasecurity.kafka.KafkaUserClient;
-import org.micro.social.eurekasecurity.redis.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;

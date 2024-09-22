@@ -11,8 +11,8 @@
 
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -56,21 +56,21 @@
 
     <modules>
         <module>eserver</module>
+        <module>config-server</module>
         <module>shareable</module>
         <module>security</module>
         <module>eclient</module>
-        <module>api-gateway</module>
-        <module>config-server</module>
         <module>data-service</module>
+        <module>api-gateway</module>
     </modules>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>3.3.2</version>
-            </plugin>
-        </plugins>
-    </build>
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.11.0</version> <!-- Онови до останньої версії -->
+        </plugin>
+    </plugins>
+</build>
 </project>

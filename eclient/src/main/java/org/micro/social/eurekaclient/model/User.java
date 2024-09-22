@@ -20,7 +20,7 @@ import java.util.Set;
 @Setter
 @Entity
 @ToString
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // Ігнорує специфічні для Hibernate властивості при серіалізації в JSON
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})// Ігнорує специфічні для Hibernate властивості при серіалізації в JSON
 public class User {
 
     @Id

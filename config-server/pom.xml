@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.2</version>
+        <version>3.2.2</version>
         <relativePath/>
     </parent>
     <groupId>org.micro</groupId>
@@ -18,7 +18,7 @@
     <properties>
         <java.version>17</java.version>
         <spring-cloud.version>2023.0.3</spring-cloud.version>
-        <spring-boot.version>3.3.2</spring-boot.version>
+        <spring-boot.version>3.2.2</spring-boot.version>
         <lombok.version>1.18.34</lombok.version>
         <jjwt.version>0.11.5</jjwt.version>
     </properties>
@@ -35,6 +35,16 @@
             <groupId>org.micro</groupId>
             <artifactId>shareable</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
 
 

@@ -4,21 +4,16 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.micro.shareable.model.Role;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.security.Key;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(MockitoExtension.class)
 class JwtUtilsTest {
 
     private JwtUtils jwtUtils;
@@ -28,21 +23,15 @@ class JwtUtilsTest {
     private String secret;
     private Key key;
 
-    AutoCloseable autoCloseable;
 
     @BeforeEach
     void setUp() {
-        autoCloseable = MockitoAnnotations.openMocks(this);
+        MockitoAnnotations.openMocks(this);
         this.lifetime = 360000L;
         this.secret = "veryveryveryverysecretsecretcodeorpasswordirono";
         key = Keys.hmacShaKeyFor(secret.getBytes());
         jwtUtils = new JwtUtils(secret, lifetime);
 
-    }
-
-    @AfterEach
-    void tearDown() throws Exception {
-        autoCloseable.close();
     }
 
     @Test

@@ -1,10 +1,8 @@
 package org.micro.social.eurekasecurity.service;
 
 import io.jsonwebtoken.Claims;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.micro.shareable.dto.UserDto;
 import org.micro.shareable.model.Role;
 import org.micro.social.eurekasecurity.dto.JwtRequest;
@@ -16,7 +14,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -35,8 +32,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest
-@ExtendWith(MockitoExtension.class)
+
+@SpringBootTest(classes = AuthServiceTest.class)
 class AuthServiceTest {
 
     @InjectMocks
@@ -54,12 +51,11 @@ class AuthServiceTest {
     @Mock
     private RoleRepository roleRepository;
 
-    AutoCloseable autoCloseable;
     UserDto user;
 
     @BeforeEach
     public void setUp() {
-        autoCloseable = MockitoAnnotations.openMocks(this);
+        MockitoAnnotations.openMocks(this);
         authService.lifetime = 3600000L;
 
         user = new UserDto("bob",
@@ -70,10 +66,7 @@ class AuthServiceTest {
     }
 
 
-    @AfterEach
-    void tearDown() throws Exception {
-        autoCloseable.close();
-    }
+
 
 
     @Test
@@ -171,7 +164,7 @@ class AuthServiceTest {
         String result = authService.createNewUser(userDto);
 
         assertEquals("Помилка", result);
-        verify(kafkaUserClient, atMostOnce()).createUser(any(UserDto.class));
+        verify(kafkaUserClient, atLeastOnce()).createUser(any(UserDto.class));
     }
 
     @Test

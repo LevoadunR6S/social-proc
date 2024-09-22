@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.2</version>
+        <version>3.2.2</version>
         <relativePath/>
     </parent>
 
@@ -19,7 +19,7 @@
     <properties>
         <java.version>17</java.version>
         <spring-cloud.version>2023.0.3</spring-cloud.version>
-        <spring-boot.version>3.3.2</spring-boot.version>
+        <spring-boot.version>3.2.2</spring-boot.version>
         <jakarta-persistence.version>3.1.0</jakarta-persistence.version>
         <hibernate-core.version>6.4.4.Final</hibernate-core.version>
         <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
@@ -73,12 +73,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.micro</groupId>
             <artifactId>shareable</artifactId>
             <version>0.0.1-SNAPSHOT</version>
@@ -96,21 +90,8 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
+
+
 
     </dependencies>
 
