@@ -66,6 +66,7 @@ public class KafkaUserClient {
     public void getResultFromUserService(KafkaMessage response) {
         //Отримуємо результат збереження користувача
         UserDto userDto = response.getUserDto();
+
         if (userDto != null) {
             //Позначаємо завдання як виконане
             mapForStrings.get(userDto.getUsername()).complete(response.getInfo());

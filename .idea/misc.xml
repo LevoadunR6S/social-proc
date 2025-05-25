@@ -5,17 +5,6 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
-        <option value="$PROJECT_DIR$/eureka-server/pom.xml" />
-        <option value="$PROJECT_DIR$/eureka-security/pom.xml" />
-        <option value="$PROJECT_DIR$/eureka-client/pom.xml" />
-        <option value="$PROJECT_DIR$/Utils/pom.xml" />
-        <option value="$PROJECT_DIR$/utils/pom.xml" />
-        <option value="$PROJECT_DIR$/api-gateway/pom.xml" />
-        <option value="$PROJECT_DIR$/demo/pom.xml" />
-        <option value="$PROJECT_DIR$/shareable/pom.xml" />
-        <option value="$PROJECT_DIR$/eserver/pom.xml" />
-        <option value="$PROJECT_DIR$/config-server/pom.xml" />
-        <option value="$PROJECT_DIR$/chat-server/pom.xml" />
       </list>
     </option>
   </component>

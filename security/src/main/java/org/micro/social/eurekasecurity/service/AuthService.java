@@ -1,5 +1,7 @@
 package org.micro.social.eurekasecurity.service;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.micro.social.eurekasecurity.dto.JwtRequest;
 import org.micro.social.eurekasecurity.dto.RegistrationUserDto;
 import org.micro.shareable.dto.UserDto;
@@ -35,11 +37,11 @@ public class AuthService {
     Long lifetime;
 
     //Метод для входу користувача
-    public String login(JwtRequest request, ServerWebExchange exchange) {
+    public String login(JwtRequest request, HttpServletResponse exchange) {
         // Отримання UserDto за іменем
         UserDto userDto = kafkaUserClient.getUserByUsername(request.getUsername()).orElse(null);
-
         if (userDto != null) {
+            if (userDto.getUsername().equals(request.getUsername())&BCrypt.checkpw(request.getPassword(), userDto.getPassword())) {
             String username = userDto.getUsername();
             // Генерація токенів
             String accessToken = jwtUtils.generate(username, userDto.getRoles(), "ACCESS");
@@ -47,13 +49,12 @@ public class AuthService {
 
             // Збереження Refresh токена в Redis
             redisService.saveRefreshToken(username, refreshToken);
-
             // Додавання токена в cookie
-            exchange.getResponse().addCookie(createCookie("AccessToken", accessToken, lifetime));
+            exchange.addCookie(createCookie("AccessToken", accessToken, lifetime));
             // Повернення відповіді з токенами
             return "Вхід успішний";
+        }else return "Пароль або логін невірний";
         }
-
         return "Пароль або логін невірний";
     }
 
@@ -108,14 +109,14 @@ public class AuthService {
     }
 
     //Метод для створення сookie, яке зберігатиме токен
-    public ResponseCookie createCookie(String cookieName, String token, Long durationMillis) {
-        return ResponseCookie.from(cookieName, token)
-                .httpOnly(true) //Тільки для протоколу HTTP
-                .secure(true) //Використовує HTTPS
-                .path("/") //Шлях по якому cookie буде доступна (в даному випадку, доступна для всіх шляхів)
-                .maxAge(durationMillis / 1000) //Час життя cookie в секундах
-
-
+    public Cookie createCookie(String cookieName, String token, Long durationMillis) {
+        Cookie cookie = new Cookie (cookieName,token);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setMaxAge((int) (durationMillis/1000));
+        cookie.setDomain("localhost");
+        return cookie;
                 //Lax. Режим, який дозволяє надсилати cookie в межах запитів з того самого домену
                 // або з піддомена (наприклад, при навігації користувача).
                 // Однак, у випадку запитів, зроблених через сторонні джерела
@@ -129,7 +130,6 @@ public class AuthService {
                 //None. Cookie будуть відправлятися з будь-якими запитами,
                 // включаючи сторонні джерела (запити з інших сайтів, iFrame, запити через форми або JavaScript).
                 //Небезпечний через те, що можливе перехоплення cookie з інших сайтів!!!!!
-                .sameSite("Lax").build(); //
 
     }
 

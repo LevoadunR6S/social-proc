@@ -63,6 +63,7 @@ public class UserService {
             // Перевіряє, чи існує вже користувач з таким username або паролем
             if (userRepository.getByUsername(userDto.getUsername()).isPresent() ||
                     userRepository.getByPassword(userDto.getPassword()).isPresent()) {
+
                 //Надсилаємо повідомлення на SecurityService із сповіщенням про те,
                 //що ім'я або пароль користувача вже існує в базі даних і повертаємо UserDto цього користувача
                 kafkaTemplate.send(responseTopic, new KafkaMessage(userDto, "Username or password exists"));
@@ -71,6 +72,7 @@ public class UserService {
             else {
                 User newUser = new User(userDto.getUsername(), userDto.getEmail(), userDto.getPassword(), userDto.getBirthDate(),
                         userDto.getRoles());
+
                 createNewUser(newUser);
                 //Надсилаємо повідомлення на SecurityService із сповіщенням про те,
                 //що користувач успішно створений, а також UserDto цього користувача
@@ -82,21 +84,23 @@ public class UserService {
         // потрібно спробувати знайти користувача в базі даних та повернути його як результат
         else if ("user-security-response".equals(responseTopic)) {
             Optional<User> user = findByUsername(message.getUsername());
-            Set<Role> roles = user.get().getRoles().stream().collect(Collectors.toSet());
 
             // Якщо користувач існує, відправляє його дані
             if (user.isPresent()) {
-                UserDto userDto = new UserDto(user.get().getUsername(),
+                Set<Role> roles = user.get().getRoles().stream().collect(Collectors.toSet());
+                UserDto userDto = new UserDto(
+                        user.get().getUsername(),
                         user.get().getPassword(),
                         user.get().getEmail(),
-                        user.get().getBirthDate(), roles);
-                //Надсилаємо повідомлення на SecurityService із знайденим користувачем
+                        user.get().getBirthDate(),
+                        roles
+                );
                 kafkaTemplate.send(responseTopic, new KafkaMessage(userDto));
-            }
-            // Якщо користувач не існує, відправляє повідомлення з ім'ям користувача
-            else {
+            } else {
+                // Якщо користувач не існує, надсилає повідомлення з null
                 kafkaTemplate.send(responseTopic, new KafkaMessage(null, message.getUsername()));
             }
         }
+
     }
 }

@@ -1,5 +1,6 @@
 package org.micro.social.eurekasecurity.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.micro.shareable.response.ResponseHandler;
 import org.micro.social.eurekasecurity.dto.JwtRequest;
 import org.micro.social.eurekasecurity.dto.RegistrationUserDto;
@@ -31,13 +32,13 @@ public class SecurityController {
         }
         else {
            return ResponseHandler.responseBuilder(HttpStatus.BAD_REQUEST,
-                    "Помилка", "result");
+                    "Помилка: Користувач існує", "result");
         }
     }
 
     // Обробляє POST запити на /auth/login для входу користувача
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody JwtRequest body, ServerWebExchange exchange) {
+    public ResponseEntity<?> login(@RequestBody JwtRequest body, HttpServletResponse exchange) {
         String result = authService.login(body, exchange);
         if (result.equals("Вхід успішний")){
             return ResponseHandler.responseBuilder(HttpStatus.OK,result,"result");

@@ -1,6 +1,9 @@
 package org.micro.social.eurekasecurity.service;
 
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.micro.shareable.dto.UserDto;
@@ -75,9 +78,8 @@ class AuthServiceTest {
         jwtRequest.setUsername("bob");
 
 
-        ServerWebExchange exchange = mock(ServerWebExchange.class);
-        ServerHttpResponse response = mock(ServerHttpResponse.class);
-        when(exchange.getResponse()).thenReturn(response);
+        HttpServletResponse exchange = mock(HttpServletResponse.class);
+        HttpServletRequest response = mock(HttpServletRequest.class);
 
         when(kafkaUserClient.getUserByUsername("bob")).thenReturn(Optional.of(user));
 
@@ -91,7 +93,7 @@ class AuthServiceTest {
         String result = authService.login(jwtRequest, exchange);
 
         assertEquals("Вхід успішний", result);
-        verify(exchange.getResponse()).addCookie(argThat(cookie -> "AccessToken".equals(cookie.getName())));
+        verify(exchange).addCookie(argThat(cookie -> "AccessToken".equals(cookie.getName())));
         verify(redisService).saveRefreshToken("bob", refreshToken);
     }
 
@@ -102,17 +104,16 @@ class AuthServiceTest {
         jwtRequest.setUsername("bob");
 
 
-        ServerWebExchange exchange = mock(ServerWebExchange.class);
-        ServerHttpResponse response = mock(ServerHttpResponse.class);
-        when(exchange.getResponse()).thenReturn(response);
+        HttpServletRequest exchange = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
 
         when(kafkaUserClient.getUserByUsername("bob")).thenReturn(Optional.empty());
 
 
-        String result = authService.login(jwtRequest, exchange);
+        String result = authService.login(jwtRequest, response);
 
         verify(redisService, never()).saveRefreshToken(any(), any());
-        verify(exchange.getResponse(), never()).addCookie(any());
+        verify(response, never()).addCookie(any());
         assertEquals("Пароль або логін невірний", result);
     }
 
@@ -223,15 +224,14 @@ class AuthServiceTest {
         String token = "testToken";
         Long durationMillis = 3600000L;
 
-        ResponseCookie responseCookie = authService.createCookie(cookieName, token, durationMillis);
+        Cookie cookie = authService.createCookie(cookieName, token, durationMillis);
 
-        assertEquals(cookieName, responseCookie.getName());
-        assertEquals(token, responseCookie.getValue());
-        assertTrue(responseCookie.isHttpOnly());
-        assertTrue(responseCookie.isSecure());
-        assertEquals("/", responseCookie.getPath());
-        assertEquals(Duration.ofSeconds(durationMillis / 1000), responseCookie.getMaxAge());
-        assertEquals("Lax", responseCookie.getSameSite());
+        assertEquals(cookieName, cookie.getName());
+        assertEquals(token, cookie.getValue());
+        assertTrue(cookie.isHttpOnly());
+        assertTrue(cookie.getSecure());
+        assertEquals("/", cookie.getPath());
+        assertEquals((durationMillis / 1000), cookie.getMaxAge());
     }
 
 }

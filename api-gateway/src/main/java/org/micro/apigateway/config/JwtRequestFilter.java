@@ -102,7 +102,7 @@ public class JwtRequestFilter implements GatewayFilter {
     public ResponseCookie createCookie(String cookieName, String token, Long durationMillis) {
         return ResponseCookie.from(cookieName, token)
                 .httpOnly(true) //Тільки для протоколу HTTP
-                .secure(true) //Використовує HTTPS
+                .secure(false) //Використовує HTTPS
                 .path("/") //Шлях по якому cookie буде доступна (в даному випадку, доступна для всіх шляхів)
                 .maxAge(durationMillis / 1000) //Час життя cookie в секундах
 
